@@ -1,6 +1,8 @@
 from __future__ import annotations
 from collections import deque
 
+from .erros import JogadaInvalida
+
 from dataclasses import dataclass
 
 TAMANHO = 9
@@ -157,20 +159,20 @@ class Tabuleiro:
         return cruza or sobrepoe
 
     def colocar_parede(self, p: Parede) -> None:
-        """Coloca a parede ou lança ValueError (e deixa o tabuleiro intacto)"""
+        """Coloca a parede ou lança JogadaInvalida (e deixa o tabuleiro intacto)"""
         if self._conflito(p):
-            raise ValueError(f"A parede {p} sobrepõe ou cruxa outra parede.")
+            raise JogadaInvalida(f"A parede {p} sobrepõe ou cruxa outra parede.")
         
         self.paredes.add(p)
 
         if not all(self.existe_caminho(origem, self.objetivos[jogador]) for jogador, origem in self.peoes.items()):
             self.paredes.remove(p)
-            raise ValueError(f"A parede {p} bloqueia o caminho de algum jogador.")
+            raise JogadaInvalida(f"A parede {p} bloqueia o caminho de algum jogador.")
 
     # ----------- ação ------------
 
     def mover(self, jogador: int, destino: Celula) -> None:
         """Move o peão do jogador para a célula de destino."""
-        if destino not in self.destinos_validados(jogador):
-            raise ValueError(f"Movimento inválido para {formatar_celula(destino)}.")
+        if destino not in self.destinos_validos(jogador):
+            raise JogadaInvalida(f"Movimento inválido para {formatar_celula(destino)}.")
         self.peoes[jogador] = destino
